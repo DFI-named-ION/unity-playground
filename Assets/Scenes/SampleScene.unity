@@ -1250,6 +1250,10 @@ PrefabInstance:
       value: DamageInflictor
       objectReference: {fileID: 0}
     - target: {fileID: 3517100740054849952, guid: a62f7b7d232049748bc1d325194d2a7c, type: 3}
+      propertyPath: JumpForce
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 3517100740054849952, guid: a62f7b7d232049748bc1d325194d2a7c, type: 3}
       propertyPath: MoveForce
       value: 100
       objectReference: {fileID: 0}

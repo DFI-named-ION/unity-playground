@@ -1,21 +1,44 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class RoaMovement : MonoBehaviour
 {
     public float MoveForce = 10f;
     public float MaxSpeed = 5f;
+    public float JumpForce = 5f;
     public bool UseBraking = true;
     public float BrakingFactor = 0.995f;
     public Transform CameraTransform;
 
     private Rigidbody _rb;
 
+    private bool _jumpRequested = false;
+    private HashSet<Collider> _contacts = new HashSet<Collider>();
+
     void Awake()
     {
         _rb = GetComponent<Rigidbody>();
         _rb.interpolation = RigidbodyInterpolation.Interpolate;
         _rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider != null)
+            _contacts.Add(collision.collider);
+    }
+
+    void OnCollisionExit(Collision collision)
+    {
+        if (collision.collider != null)
+            _contacts.Remove(collision.collider);
+    }
+
+    void Update()
+    {
+        if (Keyboard.current.spaceKey != null && Keyboard.current.spaceKey.wasPressedThisFrame)
+            _jumpRequested = true;
     }
 
     void FixedUpdate()
@@ -57,6 +80,14 @@ public class RoaMovement : MonoBehaviour
         {
             Vector3 clamped = velXZ.normalized * MaxSpeed;
             _rb.linearVelocity = new Vector3(clamped.x, _rb.linearVelocity.y, clamped.z);
+        }
+
+        _contacts.RemoveWhere(c => c == null || !c.enabled || !c.gameObject.activeInHierarchy);
+
+        if (_jumpRequested && _contacts.Count > 0)
+        {
+            _rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
+            _jumpRequested = false;
         }
     }
 }
