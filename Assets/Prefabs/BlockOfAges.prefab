@@ -154,6 +154,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoaMovement
   MoveForce: 100
   MaxSpeed: 5
+  JumpForce: 50
   UseBraking: 1
   BrakingFactor: 0.995
   CameraTransform: {fileID: 0}
+  AirSpinTorque: 1
+  MaxAngularSpeed: 20
