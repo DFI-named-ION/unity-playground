@@ -11,6 +11,9 @@ public class RoaMovement : MonoBehaviour
     public float BrakingFactor = 0.995f;
     public Transform CameraTransform;
 
+    public float AirSpinTorque = 1f;
+    public float MaxAngularSpeed = 20f;
+
     private Rigidbody _rb;
 
     private bool _jumpRequested = false;
@@ -21,6 +24,9 @@ public class RoaMovement : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         _rb.interpolation = RigidbodyInterpolation.Interpolate;
         _rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+
+        if (_rb.maxAngularVelocity < MaxAngularSpeed)
+            _rb.maxAngularVelocity = MaxAngularSpeed;
     }
 
     void OnCollisionEnter(Collision collision)
@@ -53,6 +59,7 @@ public class RoaMovement : MonoBehaviour
         if (input.sqrMagnitude > 1f)
             input.Normalize();
 
+        Vector3 moveDir = Vector3.zero;
         if (input.sqrMagnitude > 0f)
         {
             Vector3 camForward = CameraTransform.forward;
@@ -63,7 +70,7 @@ public class RoaMovement : MonoBehaviour
             camForward.Normalize();
             camRight.Normalize();
 
-            Vector3 moveDir = camForward * input.z + camRight * input.x;
+            moveDir = camForward * input.z + camRight * input.x;
 
             Vector3 force = moveDir * MoveForce;
             _rb.AddForce(force, ForceMode.Force);
@@ -88,6 +95,23 @@ public class RoaMovement : MonoBehaviour
         {
             _rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
             _jumpRequested = false;
+        }
+
+        if (_contacts.Count == 0 && moveDir.sqrMagnitude > 0.0001f)
+        {
+            Vector3 axis = Vector3.Cross(Vector3.up, moveDir.normalized);
+            if (axis.sqrMagnitude > 0.0001f)
+            {
+                float speed = velXZ.magnitude;
+                Vector3 torque = axis.normalized * (AirSpinTorque * speed);
+
+                _rb.AddTorque(torque, ForceMode.Acceleration);
+
+                if (_rb.angularVelocity.magnitude > MaxAngularSpeed)
+                {
+                    _rb.angularVelocity = _rb.angularVelocity.normalized * MaxAngularSpeed;
+                }
+            }
         }
     }
 }

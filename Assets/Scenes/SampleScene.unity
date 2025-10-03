@@ -1258,6 +1258,10 @@ PrefabInstance:
       value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 3517100740054849952, guid: a62f7b7d232049748bc1d325194d2a7c, type: 3}
+      propertyPath: AirSpinTorque
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3517100740054849952, guid: a62f7b7d232049748bc1d325194d2a7c, type: 3}
       propertyPath: CameraTransform
       value: 
       objectReference: {fileID: 1958236823}
