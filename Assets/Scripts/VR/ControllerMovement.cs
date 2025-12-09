@@ -6,11 +6,11 @@ public class ControllerMovement : MonoBehaviour
     public float Speed = 5f;
     public Transform DirectionTransform;
     public Transform PlayerTransform;
-    public LeftControllerEvents _controllerEvents;
+    public LeftControllerEvents ControllerEvents;
 
     private void Awake()
     {
-        _controllerEvents.OnStickAxisChange += OnStickAxisChange;
+        ControllerEvents.OnStickAxisChange += OnStickAxisChange;
     }
 
     private void OnStickAxisChange(Vector2 axis)

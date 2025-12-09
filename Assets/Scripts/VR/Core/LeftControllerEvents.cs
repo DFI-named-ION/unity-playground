@@ -22,48 +22,51 @@ namespace Assets.Scripts.VR.Core
 
         private void Update()
         {
-            var isStickDown = SDK.GetDown(SDK.Button.PrimaryThumbstick, SDK.Controller.LTouch);
-            var isStickUp = SDK.GetUp(SDK.Button.PrimaryThumbstick, SDK.Controller.LTouch);
-            var isStickHold = SDK.Get(SDK.Button.PrimaryThumbstick, SDK.Controller.LTouch);
-            var isStickTouch = SDK.Get(SDK.Touch.PrimaryThumbstick, SDK.Controller.LTouch);
-
-            if (isStickDown)
+            // STICK
             {
-                OnStickDown?.Invoke();
-                OnStickHoldBegin?.Invoke();
-            }
-            if (isStickUp)
-            {
-                OnStickUp?.Invoke();
-                OnStickHoldEnd?.Invoke();
-            }
-            if (isStickHold)
-                OnStickHold?.Invoke();
-            if (isStickTouch)
-                OnStickTouch?.Invoke();
+                var isStickDown = SDK.GetDown(SDK.Button.PrimaryThumbstick, SDK.Controller.LTouch);
+                var isStickUp = SDK.GetUp(SDK.Button.PrimaryThumbstick, SDK.Controller.LTouch);
+                var isStickHold = SDK.Get(SDK.Button.PrimaryThumbstick, SDK.Controller.LTouch);
+                var isStickTouch = SDK.Get(SDK.Touch.PrimaryThumbstick, SDK.Controller.LTouch);
 
-            Vector2 axis = SDK.Get(SDK.Axis2D.PrimaryThumbstick, SDK.Controller.LTouch);
+                if (isStickDown)
+                {
+                    OnStickDown?.Invoke();
+                    OnStickHoldBegin?.Invoke();
+                }
+                if (isStickUp)
+                {
+                    OnStickUp?.Invoke();
+                    OnStickHoldEnd?.Invoke();
+                }
+                if (isStickHold)
+                    OnStickHold?.Invoke();
+                if (isStickTouch)
+                    OnStickTouch?.Invoke();
 
-            if (axis.magnitude < deadZone)
-                axis = Vector2.zero;
-            
-            OnStickAxisChange?.Invoke(axis);
+                Vector2 axis = SDK.Get(SDK.Axis2D.PrimaryThumbstick, SDK.Controller.LTouch);
 
-            if (axis == Vector2.zero) return;
+                if (axis.magnitude < deadZone)
+                    axis = Vector2.zero;
 
-            if (Mathf.Abs(axis.x) > Mathf.Abs(axis.y))
-            {
-                if (axis.y > 0f)
-                    OnStickLeanUp?.Invoke(axis.y);
+                OnStickAxisChange?.Invoke(axis);
+
+                if (axis == Vector2.zero) return;
+
+                if (Mathf.Abs(axis.x) > Mathf.Abs(axis.y))
+                {
+                    if (axis.y > 0f)
+                        OnStickLeanUp?.Invoke(axis.y);
+                    else
+                        OnStickLeanDown?.Invoke(-axis.y);
+                }
                 else
-                    OnStickLeanDown?.Invoke(-axis.y);
-            }
-            else
-            {
-                if (axis.x > 0f)
-                    OnStickLeanRight?.Invoke(axis.x);
-                else
-                    OnStickLeanLeft?.Invoke(-axis.x);
+                {
+                    if (axis.x > 0f)
+                        OnStickLeanRight?.Invoke(axis.x);
+                    else
+                        OnStickLeanLeft?.Invoke(-axis.x);
+                }
             }
         }
     }
