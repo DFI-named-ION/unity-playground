@@ -3,74 +3,107 @@ using UnityEngine;
 
 public class TmpVirtualKeyboardInputSource : MonoBehaviour
 {
-    private OVRVirtualKeyboard _virtualKeyboard;
-    private TMP_InputField _inputField;
+    public OVRVirtualKeyboard VirtualKeyboard;
+    public TMP_InputField[] InputFields;
+    private TMP_InputField _currentInputField;
 
     private void Start()
     {
-        _inputField.onSelect.AddListener(OnInputFieldSelect);
-        _inputField.onValueChanged.AddListener(OnInputFieldValueChange);
-
-        _virtualKeyboard.CommitText += OnCommitText;
-        _virtualKeyboard.Backspace += OnBackspace;
-        _virtualKeyboard.Enter += OnEnter;
-        _virtualKeyboard.KeyboardHidden += OnKeyboardHidden;
-    }
-
-    private void OnDestroy()
-    {
-        if (_virtualKeyboard != null)
+        foreach (var field in InputFields)
         {
-            _virtualKeyboard.CommitText -= OnCommitText;
-            _virtualKeyboard.Backspace -= OnBackspace;
-            _virtualKeyboard.Enter -= OnEnter;
-            _virtualKeyboard.KeyboardHidden -= OnKeyboardHidden;
+            if (field == null) continue;
+
+            var f = field;
+            f.onSelect.AddListener(_ => OnInputFieldSelect(f));
+            f.onValueChanged.AddListener(newText => OnInputFieldValueChange(f, newText));
+        }
+
+        if (VirtualKeyboard != null)
+        {
+            VirtualKeyboard.CommitText += OnCommitText;
+            VirtualKeyboard.Backspace += OnBackspace;
+            VirtualKeyboard.Enter += OnEnter;
+            VirtualKeyboard.KeyboardHidden += OnKeyboardHidden;
         }
     }
 
-    private void OnInputFieldSelect(string currentText)
+    private void OnInputFieldSelect(TMP_InputField field)
     {
-        _virtualKeyboard.ChangeTextContext(currentText);
-        _virtualKeyboard.gameObject.SetActive(true);
+        _currentInputField = field;
+
+        if (VirtualKeyboard == null)
+            return;
+
+        VirtualKeyboard.ChangeTextContext(field.text);
+        VirtualKeyboard.gameObject.SetActive(true);
     }
 
-    private void OnInputFieldValueChange(string newText)
+    private void OnInputFieldValueChange(TMP_InputField field, string newText)
     {
-        _virtualKeyboard.ChangeTextContext(newText);
+        if (VirtualKeyboard == null)
+            return;
+
+        if (_currentInputField == field)
+        {
+            VirtualKeyboard.ChangeTextContext(newText);
+        }
     }
 
     private void OnCommitText(string committedText)
     {
-        _inputField.text += committedText;
-        _inputField.caretPosition = _inputField.text.Length;
-        _inputField.selectionAnchorPosition = _inputField.caretPosition;
-        _inputField.selectionStringAnchorPosition = _inputField.caretPosition;
-        _inputField.selectionFocusPosition = _inputField.caretPosition;
-        _inputField.selectionStringFocusPosition = _inputField.caretPosition;
+        if (_currentInputField == null)
+            return;
+
+        var f = _currentInputField;
+
+        f.text += committedText;
+        f.caretPosition = f.text.Length;
+        f.selectionAnchorPosition = f.caretPosition;
+        f.selectionStringAnchorPosition = f.caretPosition;
+        f.selectionFocusPosition = f.caretPosition;
+        f.selectionStringFocusPosition = f.caretPosition;
     }
 
     private void OnBackspace()
     {
-        if (string.IsNullOrEmpty(_inputField.text))
+        if (_currentInputField == null)
             return;
 
-        _inputField.text = _inputField.text.Substring(0, _inputField.text.Length - 1);
-        _inputField.caretPosition = _inputField.text.Length;
+        var f = _currentInputField;
+
+        if (string.IsNullOrEmpty(f.text))
+            return;
+
+        f.text = f.text.Substring(0, f.text.Length - 1);
+        f.caretPosition = f.text.Length;
     }
 
     private void OnEnter()
     {
-        _inputField.onEndEdit?.Invoke(_inputField.text);
-        _inputField.DeactivateInputField();
+        if (_currentInputField == null)
+            return;
 
-        _virtualKeyboard.gameObject.SetActive(false);
+        var f = _currentInputField;
+
+        f.onEndEdit?.Invoke(f.text);
+        f.DeactivateInputField();
+
+        if (VirtualKeyboard != null)
+            VirtualKeyboard.gameObject.SetActive(false);
+
+        _currentInputField = null;
     }
 
     private void OnKeyboardHidden()
     {
-        if (_inputField.isFocused)
+        if (_currentInputField == null)
+            return;
+
+        if (_currentInputField.isFocused)
         {
-            _inputField.DeactivateInputField();
+            _currentInputField.DeactivateInputField();
         }
+
+        _currentInputField = null;
     }
 }

@@ -4,3 +4,5 @@ b,2
 c,3
 ujkhh,43
 u,0
+abc,0
+dfi,13
